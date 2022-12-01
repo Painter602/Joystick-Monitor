@@ -1,0 +1,7 @@
+/deps
+/graphics_sources
+/log/*
+/target
+*.afphoto
+*.pdb
+*.d
