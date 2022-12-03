@@ -12,7 +12,7 @@ Joystick images are .svg files, 240 pixels square.  Other sizes should work, but
 ### Buttons
 Buttons are square .svg images, not more than 1/8 the size of the Joystick images, preferably smaller.
 
-1/8 - 12 would works well; i.e. 68 pixels (widget marines default to 6 pixels either side on my system).
+1/8 - 12 would works well; i.e. 240/8-12 -> 68 pixels (widget marines default to 6 pixels either side on my system).
 
 <img src="/img/b_10.svg" width="30" /> b_10.svg Button 1  
 <img src="/img/b_13.svg" width="30" /> b_10.svg Other buttons, on  
