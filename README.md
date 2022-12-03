@@ -22,3 +22,4 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 - Adapt to work with HOTAS set-ups (Hands On Throttle And Stick). Games throttles often have two, side-by-side, sliders.
 - Display other stick/slider inputs
 - Simplify finding images in memory; the program's uses a quirky approach to storing and finding images in memory.
+- Attach icon at build time
