@@ -57,5 +57,5 @@ Axies consist of up-to five, comma separated, fields
 - Field 5: calibrate, adjust the neutal centre of the device in display.
 
 ## To do
-Revise the way axis fields are set-up.
-Improve this document
+- Revise the way axis fields are set-up.
+- Improve this document
