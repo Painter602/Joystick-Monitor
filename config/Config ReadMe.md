@@ -24,6 +24,7 @@ This is a comment section.  This, together with any associated key=value pairs i
 Each device (joystick, throttle, udder pedal, or ?other?)
 - vid: a four digit hex code, used to identify the device's vendor (maker)
 - pid: a four digit hex code, used to identift the device's product code
+
 The vid and pid, together, need to form a unique value.  This program will not work with two identical, non-configurable, joysticks.  
 Throttles generally have different pid's to their associated joysticks.
 Joysticks designed to work together will, usually, have a means to configure the pid (either a switch, or some configuration software).
