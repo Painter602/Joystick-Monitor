@@ -12,7 +12,8 @@ It consists of a number of sections.  Section names appear between square bracke
    vid = 3344
    pid = C0CC
    comment = other allowed key=value pairs....
-  
+   x = ...
+
 [Comment]
 This is a comment section.  This, together with any associated key=value pairs it has, will be ignored
    a_key = a_value
