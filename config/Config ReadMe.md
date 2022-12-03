@@ -50,11 +50,11 @@ In joystick sections, unknown keys will be logged in the current session's log f
 
 ### Axis fields
 Axies consist of up-to five, comma separated, fields
--Field 1: reading, offset to small value in the buffer
--Field 2: reading, offset to high value in the buffer
--Field 3: label, text.  **Must not contain a comma**
--Field 4: invert, reverse the axis reading
--Field 5: calibrate, adjust the neutal centre of the device in display.
+- Field 1: reading, offset to small value in the buffer
+- Field 2: reading, offset to high value in the buffer
+- Field 3: label, text.  **Must not contain a comma**
+- Field 4: invert, reverse the axis reading
+- Field 5: calibrate, adjust the neutal centre of the device in display.
 
 ## To do
 Revise the way axis fields are set-up.
