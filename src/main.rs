@@ -1,20 +1,24 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 //use eframe::glow::Context;
 // hide console window on Windows in release
-use ::function_name::named;
+#[cfg(feature = "logging")]
 use chrono::Utc;
 use crate::device::Message;
 use eframe::egui;
 use egui::{Ui, Vec2, Color32, Sense, }; //InnerResponse,  Response};
 use egui_extras::image::RetainedImage;
-use log::info;
 use std::cmp;
 use std::time::{Duration, Instant};
 use walkdir::WalkDir;
 
+#[cfg(feature = "logging")]
+use log::info;
+use ::function_name::named;
+
 mod about;
 mod device;
 
+const DARK_FILL: egui::Color32 = egui::Color32::from_rgb(0x11, 0x00, 0x11); //:DARK_GRAY;  // :DARK_BLUE;  // :BLACK;
 const FILL_COLOUR: egui::Color32 = egui::Color32::GREEN;
 const FRAME_RATE: u64 = 60; //30; // 60;              // frames per second
 const IMG_SIZE: f32 = 240.0;
@@ -40,6 +44,8 @@ struct MyApp {
     now: Instant,
     show_buttons: bool,
     best_width: f32,
+    // tint: [u8; 3],
+    // recover: bool,
 }
 
 impl MyApp {
@@ -58,7 +64,7 @@ impl MyApp {
             if loading {
                 ui.horizontal(|ui| {
                     ui.centered_and_justified( |ui|{
-                        ui.add(egui::Label::new("-- Loading --"));
+                        ui.add(egui::Label::new("-- Loading, please wait --"));
                     });
                 });
             }
@@ -120,7 +126,9 @@ impl MyApp {
     
     #[named]
     fn init( &mut self ) {
-        info!("{}::{}", module_path!(), function_name!());
+		#[cfg(feature = "logging")] {
+			info!("{}::{}", module_path!(), function_name!());
+        }
         self.now = Instant::now();
         while self.err_list.len() > MAX_ERR_LIST {
             self.err_list.remove( MAX_ERR_LIST );
@@ -153,7 +161,10 @@ impl MyApp {
             }
             _ => {}
         }
-        info!("{}::{} done", module_path!(), function_name!());
+        
+		#[cfg(feature = "logging")] {
+			info!("{}::{} done", module_path!(), function_name!());
+        }
     }
 
     fn joystick_screen(&mut self, ui: &mut Ui, ctx: &egui::Context, menu_height: f32) -> f32 {
@@ -174,18 +185,19 @@ impl MyApp {
                 if dev_report.col < std::usize::MAX {
                     ui.vertical(|ui| {
                         let texture = self.images[ dev_report.col ].texture_id(ctx);
-                        let tint: egui::Color32;
-                        if dev_report.error {
-                            tint = Color32::DARK_GRAY; // :GRAY;
-                        } else {
-                            tint = Color32::WHITE;
-                        }
+                        
+                        //let tint: egui::Color32;
+                        // tint = Color32::LIGHT_GREEN ; // :LIGHT_GRAY; // :GRAY;
+                        // tint = Color32::WHITE;
+                        
                         let img = egui::widgets::Image::new( 
                                     texture, 
                                     self.img_sizes[dev_report.col ])
                                 .rotate((dev_report.z_f32()-0.5)*2.0 + dev_report.z_calibrate as f32,
-                                         Vec2::splat(0.5))
-                                .tint(tint);
+                                Vec2::splat(0.5))
+                                 // .tint(Color32::WHITE);
+                                 // .tint(tint)
+                                 ;
                         img.paint_at(ui, egui::Rect::from_center_size(
                                         egui::Pos2::new( 
                                             (dev_report.x_f32()+0.55)*self.img_sizes[dev_report.col ].x * 0.5 +
@@ -321,6 +333,8 @@ impl Default for MyApp {
             now: Instant::now(),
             show_buttons: false,
             best_width: 0.0,
+            // tint: [255; 3],
+            // recover: true,
         }
     }
 }
@@ -333,11 +347,17 @@ impl eframe::App for MyApp {
         let mut win_width: f32 = 240.0;
         ctx.request_repaint_after(TICK);
 
+        let fill_colour: Color32;
+        match self.state {
+            State::Running => { fill_colour = FILL_COLOUR; }
+            _ => { fill_colour = DARK_FILL; }
+        }
+
         let cen_pan = egui::CentralPanel::default().show(ctx, |ui| {
             egui::Frame::none()
                     .inner_margin(egui::style::Margin::same( 4.0 ))
                     .outer_margin(egui::style::Margin::same( -6.0 ))
-                    .fill(FILL_COLOUR) // :DARK_GRAY) // :GRAY) // :GREEN)
+                    .fill( fill_colour) // .fill(FILL_COLOUR) // :DARK_GRAY) // :GRAY) // :GREEN)
                     .stroke(egui::Stroke::none())
                     .show(ui, |ui| {
 
@@ -397,9 +417,10 @@ fn load_icon(path: &str) -> eframe::IconData {
 fn main() {
     // Log to stdout (if you run with `RUST_LOG=debug`).
     // tracing_subscriber::fmt::init();
-    setup_logger().expect("failed to set up logger");    
-
-    info!("{}::{}", module_path!(), function_name!());
+    #[cfg(feature = "logging")] {
+        setup_logger().expect("failed to set up logger");
+        info!("{}::{}", module_path!(), function_name!());
+    }
     let options = eframe::NativeOptions {
         initial_window_size: Some(egui::vec2(   IMG_SIZE * 2.0, 
                                                 IMG_SIZE + 20.0)),
@@ -417,6 +438,7 @@ fn main() {
 
 /* ******************************************************************************* */
 
+#[cfg(feature = "logging")] 
 fn prog() -> Option<String> {
     std::env::current_exe()
         .ok()?
@@ -427,7 +449,7 @@ fn prog() -> Option<String> {
 }
 
 /* ******************************************************************************* */
-
+#[cfg(feature = "logging")]        
 fn setup_logger() -> Result<(), fern::InitError> {
     let file: String;
     let now = Utc::now().format("%Y-%m-%d %H.%M.%S");
@@ -464,8 +486,10 @@ fn setup_logger() -> Result<(), fern::InitError> {
 
 /* ******************************************************************************* */
 
-fn show_error(module_path: &str, function_name: &str, message: String ) -> String{
-    info!( "{}::{} {}", module_path, function_name, message );
+fn show_error(_module_path: &str, _function_name: &str, message: String ) -> String{
+    #[cfg(feature = "logging")] {
+        info!( "{}::{} {}", _module_path, _function_name, message );
+    }
     message
 }
 

@@ -1,24 +1,29 @@
 use configparser::ini::Ini;
-use ::function_name::named;
 use hidapi::{HidApi, HidDevice,};
-use log:: info;					// if not using this, comment out all info! calls
-// use once_cell::sync::Lazy;	// use unsync in single threaded programs
-use once_cell::unsync::Lazy;	// use sync in multi threaded programs
+#[cfg(not(feature = "single-threaded"))]
+use once_cell::sync::Lazy;
+#[cfg(feature = "single-threaded")]
+use once_cell::unsync::Lazy;
 use std::collections::HashMap;
+
+#[cfg(feature = "logging")]
+use log:: info;
+use ::function_name::named;
 
 /* ******************************************************************************* */
 /* Constants */
-const DEV_BUF_LEN: usize = 40;	// Virpil devices use a buff length of 37 bytes
-const JS_MAX: u16 = 0xEA60;		// decimal 60,000; nearly 0xffff
-const JS_MID: u16 = JS_MAX / 2;
-const JS_MAX_F: f32 = JS_MAX as f32;
+
+const DEV_BUF_LEN: usize = 40;		// Virpil devices use a buff length of 37 bytes
+/// The max value for a joystick's axis
+pub static mut JS_MAX: u16 = 0xEA60;		// decimal 60,000; nearly 0xffff
+fn js_mid() -> u16 { unsafe{ JS_MAX / 2 } }
+fn js_max_f() -> f32 { unsafe { JS_MAX as f32 } }
 
 pub enum Message {
 	Err(String),
 	None,
 }
 
-/* Module static variables */
 static mut API: Lazy<Api> = Lazy::new(|| {	Api::new()	});
 pub static mut DEVICES_REPORTS: Lazy<HashMap<u32, DeviceReport>> = Lazy::new(|| {
 	let m = HashMap::new();
@@ -41,6 +46,7 @@ struct Api {
 
 impl Api {
 	fn new() -> Api {
+		// if this fails, we have a major problem
 		Api { hid_api: HidApi::new()
 			.expect( "HidError "), }
 	}
@@ -58,7 +64,8 @@ pub struct AxisReport {
 pub struct DeviceReport {
 	pub col: usize,
 	pub name: String,
-	pub error: bool,
+	pub error: bool,		// possible that device is sleeping/inactive
+	// ** eight axies, these are the most common options available to joystick or throttle (say)
 	pub x: u16,
 	pub y: u16,
 	pub z: u16,
@@ -68,6 +75,7 @@ pub struct DeviceReport {
 	pub slider_0: u16,
 	pub slider_1: u16,
 	pub buttons: Vec<u8>,
+	// calibration, for local adjustments
 	pub x_calibrate: i128,
 	pub y_calibrate: i128,
 	pub z_calibrate: i128,
@@ -80,11 +88,11 @@ pub struct DeviceReport {
 
 impl DeviceReport {
 	fn new( js: &Joystick ) -> DeviceReport {
-			// x_calibrate: i128, y_calibrate: i128, z_calibrate: i128) -> DeviceReport {
 		DeviceReport {
 			name : js.name.clone(),
 			col : js.col,
 			error: true,
+			// Axies default values, used zero, could reasonably have used js_mid()
 			x : 0,
 			y : 0,
 			z : 0,
@@ -105,27 +113,49 @@ impl DeviceReport {
 		}
 	}
 
+	///
 	pub fn x_f32( &self ) -> f32 {
-		self.x as f32 / JS_MAX_F
+		self.x as f32 / js_max_f()
 	}
 
 	pub  fn y_f32( &self ) -> f32 {
-		self.y as f32 / JS_MAX_F
+		self.y as f32 / js_max_f()
 	}
 
 	pub fn z_f32( &self ) -> f32 {
-		self.z as f32 / JS_MAX_F
+		self.z as f32 / js_max_f()
 	}
+	/*
+	pub fn rx_f32( &self ) -> f32 {
+		self.rx as f32 / js_max_f()
+	}
+
+	pub  fn ry_f32( &self ) -> f32 {
+		self.ry as f32 / js_max_f()
+	}
+
+	pub fn rz_f32( &self ) -> f32 {
+		self.rz as f32 / js_max_f()
+	}
+
+	pub  fn slider_0_f32( &self ) -> f32 {
+		self.slider_0 as f32 / js_max_f()
+	}
+
+	pub fn slider_1_f32( &self ) -> f32 {
+		self.slider_1 as f32 / js_max_f()
+	}
+	*/
 }
 
 /* ******************************************************************************* */
 #[derive(Debug, Clone, )]
 pub struct JoystickAxis {
-	a0 : usize,
-	a1 : usize,
-	label : String,
-	invert: bool,
-	calibrate: i128,
+	a0 : usize,			// a0, a1, the offset to bytes containing the axis' values
+	a1 : usize,			// in HID data (i.e. a0 and a1 are addresses)
+	label : String,		// a name for the axis
+	invert: bool,		// in case we need to invert the value read at a0, a1
+	calibrate: i128,	// offset to be applied for our program
 }
 
 impl JoystickAxis {
@@ -190,10 +220,10 @@ impl JoystickAxis {
 
 #[derive(Debug, Clone, )]
 pub struct Joystick {
-	vid: u16,
-	pid: u16,
-	hash: u32,
-	name: String,
+	vid: u16,				// vendor id, usually displayed as hexadecimal
+	pid: u16,				// product id, usually displayed as hexadecimal
+	hash: u32,				// quick look up, calculated as vid * 0x10000 + pid
+	name: String,			// calculated at run-time
 	x: JoystickAxis,
 	y: JoystickAxis,
 	z: JoystickAxis,
@@ -202,12 +232,12 @@ pub struct Joystick {
 	rz: JoystickAxis,
 	slider_0: JoystickAxis,
 	slider_1: JoystickAxis,
-	col: usize,
-	log_device: bool,
-	echo_x : u32,
-	echo_y : u32,
-	echo_z : u32,
-	buttons : Vec< usize >,
+	col: usize,				// display position on screen
+	log_device: bool,		// not needed in release
+	echo_x : u32,			// echo: author used echo_z to merge rudder pedal data
+	echo_y : u32,			// with non-twist joystick
+	echo_z : u32,			// echo_x and _y complete scheme for major axies
+	buttons : Vec< usize >,	// list of offsets to button reports in Hid data
 }
 
 impl Joystick {
@@ -235,49 +265,60 @@ impl Joystick {
 		}
 	}
 
+	/// ********************************************************************** 
+	/// set_config_values
+	/// values read from a .ini file
+	/// adapt as needed to suit your own file design
+	///
+	/// returns a list of error messages that could be displayed on screen
+	///
+	/// ********************************************************************** */
 	#[named]
-	fn set_config_values(&mut self, value_map: HashMap<String, Option<String>>) -> Vec<Message> {	
+	fn set_config_values(&mut self, value_map: HashMap<String, Option<String>>) -> Vec<Message> {
+		
 		let mut ret: Vec<Message> = Vec::new();
 		for (key, value ) in value_map {
 			match &value {
 				Some( val ) => {
 					let key_s = key.as_str();
 					match key_s {
-						"vid" => {
-							self.vid = hex_to_u16( val );
-						}
-						"pid" => {
-							self.pid = hex_to_u16( val );
-						}
-						"x" => {	self.x.config_split_axis( val );	}
-						"y" => {	self.y.config_split_axis( val );	}
-						"z" => {	self.z.config_split_axis( val );
-									self.z.invert = !self.z.invert;			// dirty, could do better
-								}
-						"rx" => {	self.rx.config_split_axis( val );	}
-						"ry" => {	self.ry.config_split_axis( val );	}
-						"rz" => {	self.rz.config_split_axis( val );	}
+						"vid" =>	{	self.vid = hex_to_u16( val );	}		// required
+						"pid" =>	{	self.pid = hex_to_u16( val );	}		// required
+						"x" =>		{	self.x.config_split_axis( val );	}
+						"y" =>		{	self.y.config_split_axis( val );	}
+						"z" =>		{	self.z.config_split_axis( val );	}
+									//	self.z.invert = !self.z.invert;			// dirty, could do better
+									//}
+						"rx" =>		{	self.rx.config_split_axis( val );	}
+						"ry" =>		{	self.ry.config_split_axis( val );	}
+						"rz" =>		{	self.rz.config_split_axis( val );	}
 						"slider_0" => {	self.slider_0.config_split_axis( val );	}
 						"slider_1" => {	self.slider_1.config_split_axis( val );	}
-						"col" => {	self.col = num_to_usize( val );	}
+						"col" =>	{	self.col = num_to_usize( val );	}
 						"log_device" => {
-							match val.parse::<bool>() {
-								Ok( b ) => {
-									self.log_device = b;
-								}
-								Err( err ) => {
-									ret.push( show_error(module_path!(),
-											function_name!(), 
-											format!("Error reading 'log_device' {}", err)));
-								}
-							}
+										match val.parse::<bool>() {
+											Ok( b ) => {
+												self.log_device = b;
+											}
+											Err( err ) => {
+												ret.push( show_error(module_path!(),
+														function_name!(), 
+														format!("Error reading 'log_device' {}", err)));
+											}
+										}
 						}
 						"buttons" => {	self.set_buttons( value);	}
-						"echo_x" => {	self.set_echo( 'x', val );	}
-						"echo_y" => {	self.set_echo( 'y', val );	}
-						"echo_z" => {	self.set_echo( 'z', val );	}
-						"comment" => { /* just consume comments */ }
+						// if used, echo'd devices should be displayed as two, four digit, hexadecimal numbers
+						// representing the vid and pid (in that order)
+						// e.g. as 3344 01F8
+						// where 3344 is a vendor's id,
+						// and 01F8 is an individual product
+						"echo_x" =>	{	self.set_echo( 'x', val );	}
+						"echo_y" =>	{	self.set_echo( 'y', val );	}
+						"echo_z" =>	{	self.set_echo( 'z', val );	}
+						"comment" =>	{ /* just consume comments */ }
 						other => {
+							// deal with unexpected fields
 							ret.push( show_error(module_path!(),
 												function_name!(),
 												format!(
@@ -293,10 +334,12 @@ impl Joystick {
 			}
 		}								
 		self.set_hash();
-		info!("{}::{} has read {}",
-				module_path!(),
-				function_name!(),
-				self.vid_pid());
+		#[cfg(feature = "logging")] {
+			info!("{}::{} has read {}",
+					module_path!(),
+					function_name!(),
+					self.vid_pid());
+		}
 		ret
 	}
 
@@ -332,9 +375,10 @@ impl Joystick {
 				}
 			}
 			None => {
-				info!("{}::{} {} None",
-				module_path!(), function_name!(),
-				self.vid_pid() );
+				ret.push(
+					show_error(	module_path!(),
+								function_name!(),
+								format!("{} Not found: Device might be sleeping", self.vid_pid())));
 				self.set_name();
 			}
 		}
@@ -358,7 +402,7 @@ impl Joystick {
 		}
 	}
 
-    #[named]
+	#[named]
 	fn set_echo( &mut self, axis: char, value: &String ) {
 		let mut echo_hash: u32 = 0;
 		for val in value.split(" ") {
@@ -371,13 +415,15 @@ impl Joystick {
 			'z' => {	self.echo_z = echo_hash;	}
 			_ => {}
 		}
-		info!("{}::{} {} axis from {:04x} {:04x}",
+		#[cfg(feature = "logging")] {
+			info!("{}::{} {} axis from {:04x} {:04x}",
 				module_path!(), function_name!(),
 				// self.vid,		// nice to have, but may not be known yet
 				// self.pid,		// nice to have, but may not be known yet
 				&axis,
 				echo_hash / 0x10000,
 				echo_hash % 0x10000);
+		}
 	}
 
 	fn set_hash(&mut self) {
@@ -446,7 +492,9 @@ pub fn check_devices() -> Vec<Message> {
 			for n in 0..buff.len() {
 				buff_st = format!("{}\t{}", buff_st, buff[ n ]).to_string();
 			}
-			info!("{}::{} -> {:04x} {:04x}: {}", module_path!(), function_name!(), js.vid, js.pid, buff_st);
+			#[cfg(feature = "logging")] {
+				info!("{}::{} -> {:04x} {:04x}: {}", module_path!(), function_name!(), js.vid, js.pid, buff_st);
+			}
 		}
 		make_device_report( &js, buff );
 	}
@@ -486,18 +534,20 @@ fn do_echo(joysticks: &Vec<Joystick>) {
 /* ******************************************************************************* */
 
 fn device_report_axis( axis: JoystickAxis, buff : &[u8] ) -> u16 { // a_0 : usize, a_1 : usize, invert: bool, buff : &[u8] ) -> u16 {
-	if buff[ 0 ] == 0	{ return JS_MID; }
-	if axis.a0 <= 0			{ return JS_MID; }
-	if axis.a1 <= 0			{ return JS_MID; }
+	if buff[ 0 ] == 0	{ return js_mid(); }
+	if axis.a0 <= 0		{ return js_mid(); }
+	if axis.a1 <= 0		{ return js_mid(); }
 
 	let len = buff.len();
-	if axis.a0 >= len		{ return JS_MID; }
-	if axis.a1 >= len		{ return JS_MID; }
+	if axis.a0 >= len	{ return js_mid(); }
+	if axis.a1 >= len	{ return js_mid(); }
 
 	let ret = buff[ axis.a0 ] as u16 * 0x100 + buff[ axis.a1 ] as u16;
 
 	if axis.invert {
-		return JS_MAX - ret;
+		unsafe {
+			return JS_MAX - ret;
+		}
 	}
 	ret
 }
@@ -566,7 +616,7 @@ fn make_device_report(js : &Joystick, buff : &[u8]) {
 					dr.error = true;
 				} else {
 					if dr.error {
-						dr.error = (dr.x == JS_MID) & (dr.y == JS_MID) & (dr.z == JS_MID) ;
+						dr.error = (dr.x == js_mid()) & (dr.y == js_mid()) & (dr.z == js_mid()) ;
 					// } else {
 					//	dr.error = false;		// no change
 					}
@@ -601,7 +651,9 @@ fn num_to_usize( value: &String) -> usize {
 
 pub fn show_error(module_path: &str, function_name: &str, message: String) -> Message {
 	let inf = format!("{}::{} {}", module_path, function_name, message );
-	info!( "{}", &inf );
+	#[cfg(feature = "logging")] {
+		info!( "{}", &inf );
+	}
 	Message::Err( inf )
 }
 
