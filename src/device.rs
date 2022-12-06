@@ -603,22 +603,23 @@ fn make_device_report(js : &Joystick, buff : &[u8]) {
 			Some( dr ) => {
 				let js = js.clone();
 				let mut dr = dr.clone();
-				dr.x = device_report_axis(js.x, buff);	//(js.x.a0, js.x.a1, js.x.invert, buff);
-				dr.y = device_report_axis(js.y, buff);	//(js.y.a0, js.y.a1, js.y.invert, buff);
-				dr.z = device_report_axis(js.z, buff);	//(js.z.a0, js.z.a1, js.z.invert, buff);
-				dr.rx = device_report_axis(js.rx, buff);	//(js.rx.a0, js.rx_1, js.rx.invert, buff);
-				dr.ry = device_report_axis(js.ry, buff);	//(js.ry.a0, js.ry_1, js.ry.invert, buff);
-				dr.rz = device_report_axis(js.rz, buff);	//(js.rz_0, js.rz_1, js.rz.invert, buff);
-				dr.slider_0 = device_report_axis(js.slider_0, buff);	//(js.slider_0_0, js.slider_0_1, js.slider_0_invert, buff);
-				dr.slider_1 = device_report_axis(js.slider_1, buff);	//(js.y_0, js.y_1, js.y_invert, buff);
-
 				if buff[ 0 ] == 0 {
 					dr.error = true;
 				} else {
+					dr.x = device_report_axis(js.x, buff);	//(js.x.a0, js.x.a1, js.x.invert, buff);
+					dr.y = device_report_axis(js.y, buff);	//(js.y.a0, js.y.a1, js.y.invert, buff);
+					dr.z = device_report_axis(js.z, buff);	//(js.z.a0, js.z.a1, js.z.invert, buff);
+					dr.rx = device_report_axis(js.rx, buff);	//(js.rx.a0, js.rx_1, js.rx.invert, buff);
+					dr.ry = device_report_axis(js.ry, buff);	//(js.ry.a0, js.ry_1, js.ry.invert, buff);
+					dr.rz = device_report_axis(js.rz, buff);	//(js.rz_0, js.rz_1, js.rz.invert, buff);
+					dr.slider_0 = device_report_axis(js.slider_0, buff);	//(js.slider_0_0, js.slider_0_1, js.slider_0_invert, buff);
+					dr.slider_1 = device_report_axis(js.slider_1, buff);	//(js.y_0, js.y_1, js.y_invert, buff);
+
+				//if buff[ 0 ] == 0 {
+				//	dr.error = true;
+				//} else {
 					if dr.error {
 						dr.error = (dr.x == js_mid()) & (dr.y == js_mid()) & (dr.z == js_mid()) ;
-					// } else {
-					//	dr.error = false;		// no change
 					}
 				}
 

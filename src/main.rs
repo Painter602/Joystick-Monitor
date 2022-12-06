@@ -8,7 +8,7 @@ use eframe::egui;
 use egui::{Ui, Vec2, Color32, Sense, }; //InnerResponse,  Response};
 use egui_extras::image::RetainedImage;
 use std::cmp;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant,};
 use walkdir::WalkDir;
 
 #[cfg(feature = "logging")]
@@ -20,7 +20,7 @@ mod device;
 
 const DARK_FILL: egui::Color32 = egui::Color32::from_rgb(0x11, 0x00, 0x11); //:DARK_GRAY;  // :DARK_BLUE;  // :BLACK;
 const FILL_COLOUR: egui::Color32 = egui::Color32::GREEN;
-const FRAME_RATE: u64 = 60; //30; // 60;              // frames per second
+const FRAME_RATE: u64 = 60; // 30; //120; // 60; //30; // 60;              // frames per second
 const IMG_SIZE: f32 = 240.0;
 const MAX_ERR_LIST: usize = 7; // 100;
 const PROGRAM_TITLE: &str = "Joystick Monitor";
@@ -208,6 +208,17 @@ impl MyApp {
                                         egui::Vec2::new( 
                                             self.img_sizes[dev_report.col ].x, 
                                             self.img_sizes[dev_report.col ].y)));
+                        
+                        
+                        /*
+                        dbg!( dev_report.x );
+                        if dev_report.x < 2 || dev_report.x > 59998 {
+                            dbg!( dev_report.x_f32() );
+                            dbg!( (dev_report.x_f32()+0.55)*self.img_sizes[dev_report.col ].x * 0.5 +
+                            dev_report.col as f32 * self.img_sizes[dev_report.col ].x +
+                            dev_report.x_calibrate as f32 );
+                        }
+                        */
                         
                         let texture = self.images[ 2 ].texture_id(ctx);     // hard coded, wrong!!!!
                         let img = egui::widgets::Image::new( 
