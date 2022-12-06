@@ -15,8 +15,8 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 1/8 - 12 would works well; i.e. 240/8-12 -> 68 pixels (widget margines default to 6 pixels either side on my system).
 
 <img src="/img/b_10.svg" width="30" /> b_10.svg Button 1  
-<img src="/img/b_13.svg" width="30" /> b_10.svg Other buttons, on  
-<img src="/img/b_99.svg" width="30" /> b_10.svg Buttons, off
+<img src="/img/b_13.svg" width="30" /> b_13.svg Other buttons, on  
+<img src="/img/b_99.svg" width="30" /> b_99.svg Buttons, off
 
 ## To Do
 - Adapt to work with HOTAS set-ups (Hands On Throttle And Stick). Games throttles often have two, side-by-side, sliders.
