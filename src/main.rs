@@ -1,11 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-//use eframe::glow::Context;
 // hide console window on Windows in release
 #[cfg(feature = "logging")]
 use chrono::Utc;
 use crate::device::Message;
 use eframe::egui;
-use egui::{Ui, Vec2, Color32, Sense, }; //InnerResponse,  Response};
+use egui::{Ui, Vec2, Color32, Sense, };
 use egui_extras::image::RetainedImage;
 use std::cmp;
 use std::time::{Duration, Instant,};

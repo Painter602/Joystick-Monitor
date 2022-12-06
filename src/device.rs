@@ -620,6 +620,11 @@ fn make_device_report(js : &Joystick, buff : &[u8]) {
 				//} else {
 					if dr.error {
 						dr.error = (dr.x == js_mid()) & (dr.y == js_mid()) & (dr.z == js_mid()) ;
+<<<<<<< HEAD
+=======
+					// } else {
+					//	dr.error = false;		// no change
+>>>>>>> 61bda9e248eeb644499876982bb7bf17ccf63743
 					}
 				}
 
