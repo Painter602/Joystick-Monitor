@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="100%" height="100%" viewBox="0 0 240 240" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
-    <path d="M120,79C142.629,79 161,97.371 161,120C161,142.629 142.629,161 120,161C97.371,161 79,142.629 79,120C79,97.371 97.371,79 120,79ZM120,113C123.863,113 127,116.137 127,120C127,123.863 123.863,127 120,127C116.137,127 113,123.863 113,120C113,116.137 116.137,113 120,113ZM120,84C123.863,84 127,87.137 127,91C127,94.863 123.863,98 120,98C116.137,98 113,94.863 113,91C113,87.137 116.137,84 120,84ZM120,60L131,76L109,76L120,60Z" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:2.08px;"/>
+    <g>
+        <g transform="matrix(3.33333,0,0,3.33333,-273.333,-286.667)">
+            <circle cx="118" cy="122" r="6" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:0.63px;"/>
+        </g>
+        <path d="M122,108L180,117L180,120L122,138L122,108Z" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:2.08px;"/>
+        <g transform="matrix(-1,0,0,1,240,0)">
+            <path d="M122,108L180,117L180,120L122,138L122,108Z" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:2.08px;"/>
+        </g>
+        <g transform="matrix(-5.17308e-17,-0.844828,-1,6.12323e-17,237.5,220.879)">
+            <path d="M120,106L178,115L178,120L120,129L120,106Z" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:2.25px;"/>
+        </g>
+    </g>
+    <path d="M128.245,101.776C132.204,103.571 135.476,106.619 137.554,110.413L180,117L180,120L134.002,134.275C130.393,137.816 125.45,140 120,140C114.55,140 109.607,137.816 105.998,134.275L60,120L60,117L102.446,110.413C104.524,106.619 107.797,103.571 111.755,101.776L117.5,70.5L122.5,70.5L128.245,101.776Z" style="fill:rgb(255,136,0);stroke:rgb(9,119,246);stroke-width:2.08px;"/>
 </svg>
