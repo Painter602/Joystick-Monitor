@@ -7,7 +7,7 @@ use eframe::egui;
 use egui::{Ui, Vec2, Color32, Sense, };
 use egui_extras::image::RetainedImage;
 use std::cmp;
-use std::time::{Duration, Instant,};
+use std::time::{Duration, Instant, };
 use walkdir::WalkDir;
 
 #[cfg(feature = "logging")]
@@ -93,6 +93,7 @@ impl MyApp {
 
     #[named]
     fn check_devices(&mut self) {
+		self.err_list = Vec::new();
         for mssg in device::check_devices() {
             match mssg {
                 Message::Err( mssg ) => {
@@ -329,7 +330,7 @@ impl MyApp {
                 }
                 _ => {}
             }
-        }  
+        }
     }
 }
 
