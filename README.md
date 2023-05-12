@@ -25,6 +25,8 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 <img src="/img/b_13.svg" width="30" /> b_13.svg Other buttons, on  
 <img src="/img/b_99.svg" width="30" /> b_99.svg Buttons, off
 
+To display the buttons, right click on the monitor's main screen, and select the option.
+
 ## To Do
 - Adapt to work with HOTAS set-ups (Hands On Throttle And Stick). Games throttles often have two, side-by-side, sliders.
 - Display other stick/slider inputs
