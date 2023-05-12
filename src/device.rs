@@ -222,6 +222,7 @@ impl JoystickAxis {
 pub struct Joystick {
 	vid: u16,				// vendor id, usually displayed as hexadecimal
 	pid: u16,				// product id, usually displayed as hexadecimal
+	usage_page: u16,
 	hash: u32,				// quick look up, calculated as vid * 0x10000 + pid
 	name: String,			// calculated at run-time
 	x: JoystickAxis,
@@ -246,6 +247,7 @@ impl Joystick {
 		Joystick {
 			vid: 0,
 			pid: 0,
+			usage_page: 1,
 			hash: 0,
 			name: "".to_string(),
 			x: JoystickAxis::new(),
@@ -284,6 +286,7 @@ impl Joystick {
 					match key_s {
 						"vid" =>	{	self.vid = hex_to_u16( val );	}		// required
 						"pid" =>	{	self.pid = hex_to_u16( val );	}		// required
+						"usage_page" =>	{	self.usage_page = dec_to_u16( val );	}		// default 1
 						"x" =>		{	self.x.config_split_axis( val );	}
 						"y" =>		{	self.y.config_split_axis( val );	}
 						"z" =>		{	self.z.config_split_axis( val );	}
@@ -437,31 +440,38 @@ impl Joystick {
 			api = &API.hid_api;
 		}
 		let mut ret: Message = Message::None;
-		match api.open( self.vid, self.pid ) {
-			Ok( device ) => {
-				match device.get_product_string() {
-					Ok( pr_string ) => {
-						match pr_string {
-							Some(name) => {
-								self.name = name;
+		// No, need device with usage_page == 1
+		// suggest iterate through devices
+		for device_info in api.device_list() {
+			if (device_info.vendor_id() == self.vid) &&  (device_info.product_id() == self.pid) && (device_info.usage_page() < 8) {
+				match device_info.open_device(&api) {
+					Ok( device ) => {
+						match device.get_product_string() {
+							Ok( pr_string ) => {
+								match pr_string {
+									Some(name) => {
+										self.name = name;
+									}
+									None => {}
+								}
 							}
-							None => {}
+							Err( err ) => {
+								ret = show_error(module_path!(), function_name!(), 
+									format!("Error {} - could not name device {}",
+													err, self.vid_pid()) );
+							}
+						}				
+						unsafe {
+							JS_DEVICES.insert(self.hash, device);
 						}
 					}
 					Err( err ) => {
-						ret = show_error(module_path!(), function_name!(), 
-							format!("Error {} - could not name device {}",
-											err, self.vid_pid()) );
+						ret = show_error(module_path!(), function_name!(),
+										format!("{} - could not open {}",
+													err, self.vid_pid()));
 					}
-				}				
-				unsafe {
-					JS_DEVICES.insert(self.hash, device);
 				}
-			}
-			Err( err ) => {
-				ret = show_error(module_path!(), function_name!(),
-								format!("{} - could not open {}",
-											err, self.vid_pid()));
+				break
 			}
 		}
 		ret
@@ -550,6 +560,15 @@ fn device_report_axis( axis: JoystickAxis, buff : &[u8] ) -> u16 { // a_0 : usiz
 		}
 	}
 	ret
+}
+
+/* ******************************************************************************* */
+
+fn dec_to_u16( value: &String) -> u16 {
+	match u16::from_str_radix( value.trim(), 10) {
+		Ok( val) => { val }
+		Err( _e ) => { 0 }
+	}
 }
 
 /* ******************************************************************************* */
