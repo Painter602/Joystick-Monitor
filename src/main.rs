@@ -369,7 +369,7 @@ impl eframe::App for MyApp {
                     .inner_margin(egui::style::Margin::same( 4.0 ))
                     .outer_margin(egui::style::Margin::same( -6.0 ))
                     .fill( fill_colour) // .fill(FILL_COLOUR) // :DARK_GRAY) // :GRAY) // :GREEN)
-                    .stroke(egui::Stroke::none())
+                    .stroke(egui::Stroke::NONE)
                     .show(ui, |ui| {
 
                 match self.state {
@@ -395,10 +395,16 @@ impl eframe::App for MyApp {
         frame.set_window_size(Vec2 { x: self.best_width - 9.0, y: win_height - 9.0 } );
     }
 
+    fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
+        FILL_COLOUR.to_normalized_gamma_f32()
+    }
+
+	/* *
     fn clear_color(&self, _visuals: &egui::Visuals) -> egui::Rgba {
         let colour = FILL_COLOUR.to_tuple();
         egui::Color32::from_rgba_unmultiplied(colour.0, colour.1, colour.2, colour.3).into()
     }
+	 * */
 }
 
 /* ******************************************************************************* *
@@ -440,11 +446,14 @@ fn main() {
         ..Default::default()
     };
     
-    eframe::run_native(
+    match eframe::run_native(
         PROGRAM_TITLE,
         options,
         Box::new(|_cc| Box::new(MyApp::default())),
-    );
+    ) {
+		Ok(_) => {}
+		Err(_) => {}
+	}
 }
 
 /* ******************************************************************************* */
