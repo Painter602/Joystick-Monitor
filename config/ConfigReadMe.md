@@ -30,6 +30,7 @@ The vid and pid, together, need to form a unique value.  This program will not w
 Throttles generally have different pid's to their associated joysticks.
 Joysticks designed to work together will, usually, have a means to configure the pid (either a switch, or some configuration software).
 ### Optional keys
+- usage_page = default 1, needed when there is more than one way of accessing a device
 - x = axis (eg: n0 (number), n1 (number), label (text), invert (true/false), calibrate (number))
 - y = axis (eg: n0 (number), n1 (number), label (text), invert (true/false), calibrate (number))
 - z = axis (eg: n0 (number), n1 (number), label (text), invert (true/false), calibrate (number))
