@@ -31,5 +31,7 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 - Simplify finding images in memory; the program uses a quirky approach to storing and finding images in memory.
 - Attach icon at build time
 
-## Disclaimer
+## Disclaimers
+The program was written for a pair of Virpil joysticks (HOSAS) and rudder, and has not been tested with other products.
+
 This was my first Rust project, I am certain the code could be better in all sorts of ways.
