@@ -33,5 +33,6 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 
 ## Disclaimers
 The program was written for a pair of Virpil joysticks (HOSAS) and rudder, and has not been tested with other products.
+It should be possible to use with other products.
 
 This was my first Rust project, I am certain the code could be better in all sorts of ways.
