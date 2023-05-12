@@ -23,3 +23,6 @@ Buttons are square .svg images, not more than 1/8 the size of the Joystick image
 - Display other stick/slider inputs
 - Simplify finding images in memory; the program's uses a quirky approach to storing and finding images in memory.
 - Attach icon at build time
+
+## Disclaimer
+This was my first Rust project, I am certain the code could be better in all sorts of ways.
