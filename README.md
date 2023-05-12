@@ -3,8 +3,12 @@
 A program to echo joystick actions in a window.  The window has a green background and is intended to be monitored as a window in OBS studio.
 Note: this is not written as a plugin for OBS, but could be adapted.
 
-A video showing the joystick monitor in action: https://youtu.be/V1cWxxpPcrc
 
+
+[![Joystick Monitor in action](https://github.com/Painter602/Joystick-Monitor/blob/main/assets/video_thumbnail.jpg)](http://www.youtube.com/watch?v=V1cWxxpPcrc)
+
+A video showing the joystick monitor in action:
+https://youtu.be/V1cWxxpPcrc
 ## Images
 ### Sticks
 Joystick images are .svg files, 240 pixels square.  Other sizes should work, but have not been tested.
