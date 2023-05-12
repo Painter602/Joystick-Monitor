@@ -1,6 +1,6 @@
 [package]
 name = "joystick_monitor"
-version = "0.2.0"
+version = "0.2.0a"
 edition = "2021"
 
 [dependencies]
