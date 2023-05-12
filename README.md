@@ -1,6 +1,6 @@
 # <img src="assets/JSIcon.png"> Joystick Monitor
 ## Purpose
-A program to echo joystick actions in a window.  The window has a green background and is intended to be monitored as a wondow in OBS studio.
+A program to echo joystick actions in a window.  The window has a green background and is intended to be monitored as a window in OBS studio.
 Note: this is not written as a plugin for OBS, but could be adapted.
 ## Images
 ### Sticks
